@@ -2,6 +2,9 @@ package com.danylov.microservices.controller;
 
 import com.danylov.microservices.bean.CurrencyConversionBean;
 import com.danylov.microservices.service.CurrencyExchangeServiceProxy;
+import org.apache.tomcat.util.http.fileupload.RequestContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +21,9 @@ import java.util.Map;
 public class CurrencyConversionController {
 
     @Autowired
-    CurrencyExchangeServiceProxy proxy;
+    private CurrencyExchangeServiceProxy proxy;
+
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @GetMapping("/currency-conversion/from/{from}/to/{to}/quantity/{quantity}")
     public CurrencyConversionBean convertCurrency(@PathVariable String from,
@@ -43,8 +49,9 @@ public class CurrencyConversionController {
                                                        @PathVariable String to,
                                                        @PathVariable BigDecimal quantity) {
 
-        CurrencyConversionBean response = proxy.getCurrencyExchange(from, to);
 
+        CurrencyConversionBean response = proxy.getCurrencyExchange(from, to);
+        logger.info("{}", response);
         return new CurrencyConversionBean(response.getFrom(), response.getTo(), response.getConversionIndex(), quantity, quantity.multiply(response.getConversionIndex()), response.getPort());
 
     }
